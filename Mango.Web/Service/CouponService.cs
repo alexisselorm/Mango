@@ -30,7 +30,7 @@ namespace Mango.Web.Service
            new()
            {
                ApiType = StaticDetails.ApiType.DELETE,
-               Url = StaticDetails.APIBaseUrl + "/api/coupon" + id
+               Url = StaticDetails.APIBaseUrl + "/api/coupon/" + id
            });
         }
 
@@ -70,7 +70,7 @@ namespace Mango.Web.Service
        new()
        {
            ApiType = StaticDetails.ApiType.PUT,
-           Url = StaticDetails.APIBaseUrl + "/api/coupon",
+           Url = StaticDetails.APIBaseUrl + "/api/coupon/",
            Data = couponDTO
        });
         }

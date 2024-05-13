@@ -16,11 +16,9 @@ namespace Mango.Web.Controllers
         }
         public async Task<IActionResult> CouponIndex()
         {
-            _logger.LogInformation("Something is wrong");
             List<CouponDTO?> list = [];
-            var response = await _couponService.GetAllCoupons();
-            _logger.LogInformation($"{response.Message}");
-            _logger.LogInformation($"{response.Result.ToString()}");
+            ResponseDTO response = await _couponService.GetAllCoupons();
+
             if (response != null && response.IsSuccess)
             {
                 list = JsonConvert.DeserializeObject<List<CouponDTO>>(Convert.ToString(response.Result));
@@ -46,6 +44,30 @@ namespace Mango.Web.Controllers
 
             }
             return View();
+        }
+
+        public async Task<IActionResult> CouponDelete(int couponId)
+        {
+            ResponseDTO response = await _couponService.GetCouponById(couponId);
+
+            if (response != null && response.IsSuccess)
+            {
+                CouponDTO? model = JsonConvert.DeserializeObject<CouponDTO>(Convert.ToString(response.Result));
+                return View(model);
+            }
+            return NotFound();
+        }
+        [HttpPost]
+        public async Task<IActionResult> CouponDelete(CouponDTO coupon)
+        {
+            ResponseDTO response = await _couponService.DeleteCouponAsync(coupon.CouponId);
+            _logger.LogInformation("here");
+            if (response != null && response.IsSuccess)
+            {
+                CouponDTO? model = JsonConvert.DeserializeObject<CouponDTO>(Convert.ToString(response.Result));
+                return RedirectToAction(nameof(CouponIndex));
+            }
+            return View(coupon);
         }
     }
 }
