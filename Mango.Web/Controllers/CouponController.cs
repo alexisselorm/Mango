@@ -5,32 +5,47 @@ using Newtonsoft.Json;
 
 namespace Mango.Web.Controllers
 {
-	public class CouponController : Controller
-	{
-		private readonly ICouponService _couponService;
-		private readonly ILogger<CouponController> _logger;
-		public CouponController(ICouponService couponService, ILogger<CouponController> logger)
-		{
-			_couponService = couponService;
-			_logger = logger;
-		}
-		public async Task<IActionResult> CouponIndex()
-		{
-			_logger.LogInformation("Something is wrong");
-			List<CouponDTO?> list = [];
-			var response = await _couponService.GetAllCoupons();
-			_logger.LogInformation($"{response.Message}");
-			_logger.LogInformation($"{response.Result.ToString()}");
-			if (response != null && response.IsSuccess)
-			{
-				list = JsonConvert.DeserializeObject<List<CouponDTO>>(Convert.ToString(response.Result));
-			}
-			return View(list);
-		}
+    public class CouponController : Controller
+    {
+        private readonly ICouponService _couponService;
+        private readonly ILogger<CouponController> _logger;
+        public CouponController(ICouponService couponService, ILogger<CouponController> logger)
+        {
+            _couponService = couponService;
+            _logger = logger;
+        }
+        public async Task<IActionResult> CouponIndex()
+        {
+            _logger.LogInformation("Something is wrong");
+            List<CouponDTO?> list = [];
+            var response = await _couponService.GetAllCoupons();
+            _logger.LogInformation($"{response.Message}");
+            _logger.LogInformation($"{response.Result.ToString()}");
+            if (response != null && response.IsSuccess)
+            {
+                list = JsonConvert.DeserializeObject<List<CouponDTO>>(Convert.ToString(response.Result));
+            }
+            return View(list);
+        }
 
-		public async Task<IActionResult> CouponCreate()
-		{
-			return View();
-		}
-	}
+        public async Task<IActionResult> CouponCreate()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> CouponCreate(CouponDTO dto)
+        {
+            if (ModelState.IsValid)
+            {
+                ResponseDTO? response = await _couponService.CreateCouponAsync(dto);
+                if (response != null && response.IsSuccess)
+                {
+                    return RedirectToAction(nameof(CouponIndex));
+                }
+
+            }
+            return View();
+        }
+    }
 }
