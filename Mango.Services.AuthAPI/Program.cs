@@ -13,7 +13,14 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection("ApiSettings:JwtOptions"));
 
-builder.Services.AddIdentity<AppUser, IdentityRole>()
+builder.Services.AddIdentity<AppUser, IdentityRole>(opts =>
+{
+    opts.SignIn.RequireConfirmedAccount = true;
+    opts.Password.RequireDigit = true;
+    opts.Password.RequireLowercase = true;
+    opts.Password.RequireUppercase = true;
+    opts.Password.RequiredLength = 8;
+})
     .AddEntityFrameworkStores<AppDbContext>()
     .AddDefaultTokenProviders();
 
