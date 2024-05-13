@@ -13,17 +13,38 @@ namespace Mango.Services.AuthAPI.Service
         private readonly RoleManager<IdentityRole> _roleManager;
         public AuthService(RoleManager<IdentityRole> roleManager, AppDbContext db, UserManager<AppUser> userManager)
         {
-            _roleManager = roleManager;
+            _userManager = userManager;
             _db = db;
             _roleManager = roleManager;
 
         }
-        public Task<LoginResponeDTO> Login(LoginRequestDTO requestDTO)
+        public async Task<LoginResponeDTO> Login(LoginRequestDTO requestDTO)
         {
-            throw new NotImplementedException();
+            var user = _db.AppUsers.FirstOrDefault(u => u.UserName.ToLower() == requestDTO.UserName.ToLower());
+            bool isValid = await _userManager.CheckPasswordAsync(user, requestDTO.Password);
+            if (user == null || isValid == false)
+            {
+                return new LoginResponeDTO() { User = null, Token = "" };
+            }
+            //Generate token if user found
+            UserDTO userDTO = new()
+            {
+                Email = user.Email,
+                ID = user.Id,
+                Name = user.Name,
+                PhoneNumber = user.PhoneNumber
+            };
+
+
+            LoginResponeDTO loginResponeDTO = new()
+            {
+                User = userDTO,
+                Token = ""
+            };
+            return loginResponeDTO;
         }
 
-        public async Task<UserDTO> Register(RegistrationRequestDTO requestDTO)
+        public async Task<string> Register(RegistrationRequestDTO requestDTO)
         {
             AppUser user = new()
             {
@@ -47,12 +68,17 @@ namespace Mango.Services.AuthAPI.Service
                         PhoneNumber = userToReturn.PhoneNumber
                     };
 
-                    return userDto;
+                    return "";
+                }
+                else
+                {
+
+                    return result.Errors?.FirstOrDefault().Description;
                 }
             }
             catch (Exception ex)
             {
-                return new UserDTO();
+                return ex.Message;
             }
         }
     }
