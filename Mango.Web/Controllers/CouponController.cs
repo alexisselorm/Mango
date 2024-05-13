@@ -9,11 +9,13 @@ namespace Mango.Web.Controllers
     {
         private readonly ICouponService _couponService;
         private readonly ILogger<CouponController> _logger;
+
         public CouponController(ICouponService couponService, ILogger<CouponController> logger)
         {
             _couponService = couponService;
             _logger = logger;
         }
+
         public async Task<IActionResult> CouponIndex()
         {
             List<CouponDTO?> list = [];
@@ -22,6 +24,10 @@ namespace Mango.Web.Controllers
             if (response != null && response.IsSuccess)
             {
                 list = JsonConvert.DeserializeObject<List<CouponDTO>>(Convert.ToString(response.Result));
+            }
+            else
+            {
+                TempData["error"] = response?.Message;
             }
             return View(list);
         }
@@ -39,10 +45,15 @@ namespace Mango.Web.Controllers
                 ResponseDTO? response = await _couponService.CreateCouponAsync(dto);
                 if (response != null && response.IsSuccess)
                 {
+                    TempData["success"] = "Coupon created successfully";
                     return RedirectToAction(nameof(CouponIndex));
                 }
-
+                else
+                {
+                    TempData["error"] = response?.Message;
+                }
             }
+
             return View();
         }
 
@@ -55,17 +66,28 @@ namespace Mango.Web.Controllers
                 CouponDTO? model = JsonConvert.DeserializeObject<CouponDTO>(Convert.ToString(response.Result));
                 return View(model);
             }
+            else
+            {
+                TempData["error"] = response?.Message;
+            }
             return NotFound();
         }
+
         [HttpPost]
         public async Task<IActionResult> CouponDelete(CouponDTO coupon)
         {
             ResponseDTO response = await _couponService.DeleteCouponAsync(coupon.CouponId);
-            _logger.LogInformation("here");
+
             if (response != null && response.IsSuccess)
             {
                 CouponDTO? model = JsonConvert.DeserializeObject<CouponDTO>(Convert.ToString(response.Result));
+                TempData["success"] = "Coupon deleted successfully";
+
                 return RedirectToAction(nameof(CouponIndex));
+            }
+            else
+            {
+                TempData["error"] = response?.Message;
             }
             return View(coupon);
         }
