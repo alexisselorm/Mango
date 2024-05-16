@@ -2,7 +2,8 @@
 {
     public class StaticDetails
     {
-        public static string APIBaseUrl { get; set; }
+        public static string CouponAPIUrl { get; set; }
+        public static string AuthAPIUrl { get; set; }
         public enum ApiType
         {
             GET,

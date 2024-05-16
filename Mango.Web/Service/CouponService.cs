@@ -19,7 +19,7 @@ namespace Mango.Web.Service
            new()
            {
                ApiType = StaticDetails.ApiType.POST,
-               Url = StaticDetails.APIBaseUrl + "/api/coupon",
+               Url = StaticDetails.CouponAPIUrl + "/api/coupon",
                Data = couponDTO
            });
         }
@@ -30,7 +30,7 @@ namespace Mango.Web.Service
            new()
            {
                ApiType = StaticDetails.ApiType.DELETE,
-               Url = StaticDetails.APIBaseUrl + "/api/coupon/" + id
+               Url = StaticDetails.CouponAPIUrl + "/api/coupon/" + id
            });
         }
 
@@ -40,7 +40,7 @@ namespace Mango.Web.Service
                 new()
                 {
                     ApiType = StaticDetails.ApiType.GET,
-                    Url = StaticDetails.APIBaseUrl + "/api/coupon"
+                    Url = StaticDetails.CouponAPIUrl + "/api/coupon"
                 });
         }
 
@@ -50,7 +50,7 @@ namespace Mango.Web.Service
            new()
            {
                ApiType = StaticDetails.ApiType.GET,
-               Url = StaticDetails.APIBaseUrl + "/api/coupon/" + code
+               Url = StaticDetails.CouponAPIUrl + "/api/coupon/" + code
            });
         }
 
@@ -60,7 +60,7 @@ namespace Mango.Web.Service
            new()
            {
                ApiType = StaticDetails.ApiType.GET,
-               Url = StaticDetails.APIBaseUrl + "/api/coupon/" + id
+               Url = StaticDetails.CouponAPIUrl + "/api/coupon/" + id
            });
         }
 
@@ -70,7 +70,7 @@ namespace Mango.Web.Service
        new()
        {
            ApiType = StaticDetails.ApiType.PUT,
-           Url = StaticDetails.APIBaseUrl + "/api/coupon/",
+           Url = StaticDetails.CouponAPIUrl + "/api/coupon/",
            Data = couponDTO
        });
         }
