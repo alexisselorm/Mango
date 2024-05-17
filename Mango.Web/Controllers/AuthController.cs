@@ -60,6 +60,10 @@ namespace Mango.Web.Controllers
                     return RedirectToAction(nameof(Login));
                 }
             }
+            else
+            {
+                TempData["error"] = responseDTO.Message;
+            }
 
             var roleList = new List<SelectListItem>()
             {
@@ -83,9 +87,9 @@ namespace Mango.Web.Controllers
             }
             else
             {
-                ModelState.AddModelError("CustomError", result.Message);
-                return View(dto);
+                TempData["error"] = result.Message;
             }
+            return View(dto);
         }
 
         private async Task SignInUser(LoginResponeDTO dto)
@@ -97,6 +101,7 @@ namespace Mango.Web.Controllers
             identity.AddClaim(new(JwtRegisteredClaimNames.Sub, jwt.Claims.FirstOrDefault(u => u.Type == JwtRegisteredClaimNames.Sub).Value));
             identity.AddClaim(new(JwtRegisteredClaimNames.Name, jwt.Claims.FirstOrDefault(u => u.Type == JwtRegisteredClaimNames.Name).Value));
             identity.AddClaim(new(ClaimTypes.Name, jwt.Claims.FirstOrDefault(u => u.Type == JwtRegisteredClaimNames.Email).Value));
+            identity.AddClaim(new(ClaimTypes.Role, jwt.Claims.FirstOrDefault(u => u.Type == "role").Value));
 
 
             var principal = new ClaimsPrincipal(identity);
