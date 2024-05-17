@@ -44,8 +44,9 @@ namespace Mango.Services.AuthAPI.Service
             {
                 return new LoginResponeDTO() { User = null, Token = "" };
             }
+            var roles = await _userManager.GetRolesAsync(user);
             //Generate token if user found
-            var token = _jwtTokenGenerator.GenerateToken(user);
+            var token = _jwtTokenGenerator.GenerateToken(user, roles);
             UserDTO userDTO = new()
             {
                 Email = user.Email,
