@@ -6,6 +6,7 @@
         public static string AuthAPIUrl { get; set; }
         public const string RoleAdmin = "ADMINISTRATOR";
         public const string RoleCustomer = "CUSTOMER";
+        public const string TokenCookie = "JwtToken";
         public enum ApiType
         {
             GET,

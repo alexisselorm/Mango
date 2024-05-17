@@ -16,6 +16,7 @@ StaticDetails.AuthAPIUrl = builder.Configuration["ServiceURLs:AuthAPI"];
 
 builder.Services.AddScoped<IBaseService, BaseService>();
 builder.Services.AddScoped<ICouponService, CouponService>();
+builder.Services.AddScoped<ITokenProvider, TokenProvider>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 
 var app = builder.Build();
