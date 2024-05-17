@@ -1,18 +1,25 @@
 ﻿using Mango.Web.Models;
 using Mango.Web.Service.IService;
 using Mango.Web.Utility;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Newtonsoft.Json;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 
 namespace Mango.Web.Controllers
 {
     public class AuthController : Controller
     {
         private IAuthService _authService;
-        public AuthController(IAuthService authService)
+        private readonly ITokenProvider _tokenProvider;
+        public AuthController(IAuthService authService, ITokenProvider tokenProvider)
         {
             _authService = authService;
+            _tokenProvider = tokenProvider;
+
         }
 
         public IActionResult Login()
@@ -70,7 +77,8 @@ namespace Mango.Web.Controllers
             if (result != null && result.IsSuccess)
             {
                 LoginResponeDTO response = JsonConvert.DeserializeObject<LoginResponeDTO>(Convert.ToString(result.Result));
-
+                await SignInUser(response);
+                _tokenProvider.setToken(response.Token);
                 return RedirectToAction("Index", "Home");
             }
             else
@@ -80,10 +88,27 @@ namespace Mango.Web.Controllers
             }
         }
 
-        public IActionResult Logout()
+        private async Task SignInUser(LoginResponeDTO dto)
         {
+            var handler = new JwtSecurityTokenHandler();
+            var jwt = handler.ReadJwtToken(dto.Token);
+            var identity = new ClaimsIdentity(CookieAuthenticationDefaults.AuthenticationScheme);
+            identity.AddClaim(new(JwtRegisteredClaimNames.Email, jwt.Claims.FirstOrDefault(u => u.Type == JwtRegisteredClaimNames.Email).Value));
+            identity.AddClaim(new(JwtRegisteredClaimNames.Sub, jwt.Claims.FirstOrDefault(u => u.Type == JwtRegisteredClaimNames.Sub).Value));
+            identity.AddClaim(new(JwtRegisteredClaimNames.Name, jwt.Claims.FirstOrDefault(u => u.Type == JwtRegisteredClaimNames.Name).Value));
+            identity.AddClaim(new(ClaimTypes.Name, jwt.Claims.FirstOrDefault(u => u.Type == JwtRegisteredClaimNames.Email).Value));
+
+
+            var principal = new ClaimsPrincipal(identity);
+            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
+        }
+
+        public async Task<IActionResult> Logout()
+        {
+            await HttpContext.SignOutAsync();
+            _tokenProvider.clearToken();
             //RegistrationRequestDTO dto = new();
-            return View();
+            return RedirectToAction("Index", "Home");
         }
     }
 }
