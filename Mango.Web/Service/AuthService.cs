@@ -14,14 +14,14 @@ namespace Mango.Web.Service
             _baseService = baseService;
 
         }
-        public async Task<ResponseDTO?> AssignRoleAsync(RegistrationRequestDTO dto)
+        public async Task<ResponseDTO?> AssignToRole(RegistrationRequestDTO dto)
         {
             return await _baseService.sendAsync(
            new()
            {
                ApiType = StaticDetails.ApiType.POST,
                Data = dto,
-               Url = StaticDetails.CouponAPIUrl + "/api/auth/AssignRole"
+               Url = StaticDetails.AuthAPIUrl + "/api/auth/AssignToRole"
            });
         }
 
@@ -32,7 +32,7 @@ namespace Mango.Web.Service
      {
          ApiType = StaticDetails.ApiType.POST,
          Data = dto,
-         Url = StaticDetails.CouponAPIUrl + "/api/auth/login"
+         Url = StaticDetails.AuthAPIUrl + "/api/auth/login"
      });
         }
 
@@ -43,7 +43,7 @@ namespace Mango.Web.Service
      {
          ApiType = StaticDetails.ApiType.POST,
          Data = dto,
-         Url = StaticDetails.CouponAPIUrl + "/api/auth/register"
+         Url = StaticDetails.AuthAPIUrl + "/api/auth/register"
      });
         }
     }
