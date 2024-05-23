@@ -20,7 +20,7 @@ namespace Mango.Services.AuthAPI.Service
         public string GenerateToken(AppUser appUser, IEnumerable<string> roles)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.ASCII.GetBytes(_jwtOptions.Secret);
+            var key = Encoding.UTF8.GetBytes(_jwtOptions.Secret);
             var claims = new List<Claim> {
             new(JwtRegisteredClaimNames.Email,appUser.Email),
             new(JwtRegisteredClaimNames.Sub,appUser.Id),
