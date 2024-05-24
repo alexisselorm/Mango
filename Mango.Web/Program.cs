@@ -19,6 +19,7 @@ StaticDetails.ProductAPIUrl = builder.Configuration["ServiceURLs:ProductAPI"];
 builder.Services.AddScoped<IBaseService, BaseService>();
 builder.Services.AddScoped<ICouponService, CouponService>();
 builder.Services.AddScoped<ITokenProvider, TokenProvider>();
+builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
