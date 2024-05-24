@@ -57,9 +57,9 @@ namespace Mango.Web.Controllers
 			return View();
 		}
 
-		public async Task<IActionResult> ProductDelete(int ProductId)
+		public async Task<IActionResult> ProductDelete(int productId)
 		{
-			ResponseDTO response = await _productService.GetProductById(ProductId);
+			ResponseDTO response = await _productService.GetProductById(productId);
 
 			if (response != null && response.IsSuccess)
 			{
