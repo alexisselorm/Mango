@@ -27,7 +27,7 @@ namespace Mango.Services.ShoppingCartAPI.Controllers
         {
             try
             {
-                var cartHeaderFromDb = await _context.CartHeaders.FirstOrDefaultAsync(c => c.UserId == cartDTO.CartHeader.UserId);
+                var cartHeaderFromDb = await _context.CartHeaders.AsNoTracking().FirstOrDefaultAsync(c => c.UserId == cartDTO.CartHeader.UserId);
                 if (cartHeaderFromDb == null)
                 {
                     //create cart header and cart detail
@@ -43,18 +43,27 @@ namespace Mango.Services.ShoppingCartAPI.Controllers
                 {
                     //if header is not null
                     //check if details has the same product
-                    var cartDetailsFromDb = await _context.CartDetails.FirstOrDefaultAsync(c => c.ProductId == cartDTO.CartDetails.First().ProductId
+                    var cartDetailsFromDb = await _context.CartDetails.AsNoTracking().FirstOrDefaultAsync(c => c.ProductId == cartDTO.CartDetails.First().ProductId
                     && c.CartHeaderId == cartHeaderFromDb.CartHeaderId);
                     if (cartDetailsFromDb == null)
                     {
                         //Created cartdetails
+                        cartDTO.CartDetails.First().CartHeaderId = cartDetailsFromDb.CartHeaderId;
+                        _context.CartDetails.Add(_mapper.Map<CartDetails>(cartDTO.CartDetails.First()));
+                        await _context.SaveChangesAsync();
                     }
                     else
                     {
                         //update count in cart details
+                        cartDTO.CartDetails.First().Count += cartDetailsFromDb.Count;
+                        cartDTO.CartDetails.First().CartHeaderId = cartDetailsFromDb.CartHeaderId;
+                        cartDTO.CartDetails.First().CartDetailsId = cartDetailsFromDb.CartDetailsId;
+                        _context.CartDetails.Update(_mapper.Map<CartDetails>(cartDTO.CartDetails.First()));
+                        await _context.SaveChangesAsync();
                     }
 
                 }
+                _response.Result = cartDTO;
 
             }
             catch (Exception e)
@@ -62,6 +71,7 @@ namespace Mango.Services.ShoppingCartAPI.Controllers
                 _response.Message = e.Message;
                 _response.IsSuccess = false;
             }
+            return _response;
         }
     }
 }
