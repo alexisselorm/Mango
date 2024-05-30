@@ -13,16 +13,17 @@ namespace Mango.Services.ShoppingCartAPI.Controllers
     public class ShoppingCartAPIController : ControllerBase
     {
         private readonly AppDbContext _db;
-        private readonly IProductService _productService
+        private readonly IProductService _productService;
+        private readonly ICouponService _couponService;
         private readonly IMapper _mapper;
         private ResponseDTO _response;
-        public ShoppingCartAPIController(AppDbContext db, IMapper mapper, IProductService productService)
+        public ShoppingCartAPIController(AppDbContext db, IMapper mapper, IProductService productService, ICouponService couponService)
         {
             _db = db;
             _mapper = mapper;
             _response = new ResponseDTO();
             _productService = productService;
-
+            _couponService = couponService;
         }
 
         [HttpPost("CartUpsert")]
@@ -95,24 +96,7 @@ namespace Mango.Services.ShoppingCartAPI.Controllers
             }
             return _response;
         }
-        [HttpPost("RemoveCoupon")]
-        public async Task<object> RemoveCoupon([FromBody] CartDTO cartDTO)
-        {
-            try
-            {
-                var cartFromDb = await _db.CartHeaders.FirstAsync(c => c.UserId == cartDTO.CartHeader.UserId);
-                cartFromDb.CouponCode = "";
-                _db.CartHeaders.Update(cartFromDb);
-                await _db.SaveChangesAsync();
-                _response.Result = true;
-            }
-            catch (Exception e)
-            {
-                _response.Message = e.Message;
-                _response.IsSuccess = false;
-            }
-            return _response;
-        }
+
 
         [HttpGet("GetCart/{userId}")]
         public async Task<ResponseDTO> GetCart(string userId)
@@ -133,6 +117,16 @@ namespace Mango.Services.ShoppingCartAPI.Controllers
                     cart.CartHeader.TotalAmount += (item.Count * item.Product.Price);
 
                 }
+                if (!string.IsNullOrEmpty(cart.CartHeader.CouponCode))
+                {
+                    CouponDTO coupon = await _couponService.GetCoupon(cart.CartHeader.CouponCode);
+                    if (coupon != null && cart.CartHeader.TotalAmount > coupon.MinAmount)
+                    {
+                        cart.CartHeader.TotalAmount -= coupon.DiscountAmount;
+                        cart.CartHeader.Discount = coupon.DiscountAmount;
+                    }
+                }
+                _response.Result = cart;
             }
             catch (Exception e)
             {
