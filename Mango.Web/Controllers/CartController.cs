@@ -15,6 +15,46 @@ namespace Mango.Web.Controllers
             _cartService = cartService;
 
         }
+
+        [HttpPost]
+        public async Task<IActionResult> Remove(int cartDetailsId)
+        {
+            var userId = User.Claims.Where(u => u.Type == JwtRegisteredClaimNames.Sub)?.FirstOrDefault()?.Value;
+            var response = await _cartService.RemoveFromCartAsync(cartDetailsId);
+            if (response != null && response.IsSuccess)
+            {
+                TempData["success"] = "Cart updated successfully";
+                return RedirectToAction(nameof(CartIndex));
+            }
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ApplyCoupon(CartDTO cartdto)
+        {
+            var userId = User.Claims.Where(u => u.Type == JwtRegisteredClaimNames.Sub)?.FirstOrDefault()?.Value;
+            var response = await _cartService.ApplyCouponAsync(cartdto);
+            if (response != null && response.IsSuccess)
+            {
+                TempData["success"] = "Cart updated successfully";
+                return RedirectToAction(nameof(CartIndex));
+            }
+            return View();
+        }
+        [HttpPost]
+        public async Task<IActionResult> RemoveCoupon(CartDTO cartdto)
+        {
+            cartdto.CartHeader.CouponCode = "";
+            var userId = User.Claims.Where(u => u.Type == JwtRegisteredClaimNames.Sub)?.FirstOrDefault()?.Value;
+            var response = await _cartService.ApplyCouponAsync(cartdto);
+            if (response != null && response.IsSuccess)
+            {
+                TempData["success"] = "Cart updated successfully";
+                return RedirectToAction(nameof(CartIndex));
+            }
+            return View();
+        }
+
         [Authorize]
         public async Task<IActionResult> CartIndex()
         {
@@ -32,5 +72,7 @@ namespace Mango.Web.Controllers
             }
             return new CartDTO();
         }
+
+
     }
 }
