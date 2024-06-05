@@ -21,7 +21,7 @@ namespace Mango.Web.Service
           new()
           {
               ApiType = StaticDetails.ApiType.POST,
-              Url = StaticDetails.OrderAPIUrl + "/api/Order",
+              Url = StaticDetails.OrderAPIUrl + "/api/order/CreateOrder",
               Data = cartDTO
           });
         }

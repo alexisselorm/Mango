@@ -21,7 +21,7 @@ namespace Mango.Services.EmailAPI.Messaging
             _config = config;
             serviceBusConnectionString = _config["ServiceBusConnectionString"];
             emailCartQueue = _config["TopicAndQueueNames:EmailShoppingCartQueue"];
-            emailCartQueue = _config["TopicAndQueueNames:RegisterUserQueue"];
+            registerCartQueue = _config["TopicAndQueueNames:RegisterUserQueue"];
 
             var client = new ServiceBusClient(serviceBusConnectionString);
             _emailCartProcessor = client.CreateProcessor(emailCartQueue);
