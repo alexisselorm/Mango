@@ -19,7 +19,7 @@
         public string? Status { get; set; }
         public string? PaymentIntentId { get; set; }
         public string? StripeSessionId { get; set; }
-        public IEnumerable<OrderDetail> OrderDetails { get; set; }
+        public IEnumerable<OrderDetailDTO> OrderDetails { get; set; }
 
     }
 }
