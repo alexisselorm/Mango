@@ -2,7 +2,7 @@
 using Mango.Services.OrderAPI.Models;
 using Mango.Services.OrderAPI.Models.DTO;
 
-namespace Mango.Services.ShoppingCartAPI
+namespace Mango.Services.OrderAPI
 {
     public class MappingConfig
     {
