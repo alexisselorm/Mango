@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace Mango.Services.OrderAPI.Models.DTO
+﻿namespace Mango.Services.OrderAPI.Models.DTO
 {
     public class CartHeaderDTO
     {
@@ -9,11 +7,10 @@ namespace Mango.Services.OrderAPI.Models.DTO
         public string? CouponCode { get; set; }
         public double Discount { get; set; }
         public double TotalAmount { get; set; }
-        [Required]
+
         public string? Name { get; set; }
-        [Required]
+
         public string? Phone { get; set; }
-        [Required]
         public string? Email { get; set; }
     }
 }
