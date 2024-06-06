@@ -7,6 +7,7 @@ using Mango.Services.OrderAPI.Service.IService;
 using Mango.Services.OrderAPI.Utility;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Stripe;
 using Stripe.Checkout;
 
 namespace Mango.Services.OrderAPI.Controllers
@@ -75,6 +76,19 @@ namespace Mango.Services.OrderAPI.Controllers
                     Mode = "payment",
                 };
 
+                if (dto.OrderHeader.Discount > 0)
+                {
+                    var DiscountjsObj = new List<SessionDiscountOptions>()
+                    {
+                        new SessionDiscountOptions
+                        {
+                            Coupon=dto.OrderHeader.CouponCode,
+                        }
+                    };
+                    options.Discounts = DiscountjsObj;
+                }
+
+
                 foreach (var item in dto.OrderHeader.OrderDetails)
                 {
                     var sessionlineItem = new SessionLineItemOptions
@@ -88,7 +102,8 @@ namespace Mango.Services.OrderAPI.Controllers
                                 Name = item.Product.Name
                             }
                         },
-                        Quantity = item.Count
+                        Quantity = item.Count,
+
                     };
                     options.LineItems.Add(sessionlineItem);
                 }
@@ -100,6 +115,42 @@ namespace Mango.Services.OrderAPI.Controllers
                 orderHeader.StripeSessionId = session.Id;
                 await _db.SaveChangesAsync();
                 _response.Result = dto;
+            }
+            catch (Exception ex)
+            {
+
+                _response.IsSuccess = false;
+                _response.Message = ex.Message;
+            }
+            return _response;
+        }
+
+        [HttpPost("ValidateStripeSession")]
+        [Authorize]
+        public async Task<ResponseDTO> ValidateSripeSession([FromBody] int orderHeaderId)
+        {
+            try
+            {
+                var orderHeader = _db.OrderHeaders.First(u => u.OrderHeaderId == orderHeaderId);
+
+
+                var service = new Stripe.Checkout.SessionService();
+                Session session = service.Get(orderHeader.StripeSessionId);
+
+                var paymentIntentService = new PaymentIntentService();
+                PaymentIntent paymentIntent = paymentIntentService.Get(session.PaymentIntentId);
+
+                if (paymentIntent.Status == "succeeded")
+                {
+                    //Payment was successful
+                    orderHeader.PaymentIntentId = paymentIntent.Id;
+                    orderHeader.Status = StaticDetails.Status_Approved;
+                    await _db.SaveChangesAsync();
+
+                    _response.Result = _mapper.Map<OrderHeaderDTO>(orderHeader);
+
+                }
+
             }
             catch (Exception ex)
             {
