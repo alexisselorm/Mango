@@ -81,6 +81,12 @@ namespace Mango.Web.Controllers
         }
 
         [Authorize]
+        public async Task<IActionResult> Confirmation(int orderId)
+        {
+            return View(orderId);
+        }
+
+        [Authorize]
         public async Task<IActionResult> Checkout()
         {
             return View(await LoadCartBasedonLoggedInUser());
