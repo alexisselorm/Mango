@@ -24,13 +24,17 @@ namespace Mango.Services.OrderAPI.Controllers
         private ResponseDTO _response;
         public OrderAPIController(AppDbContext db,
             IProductService productService,
-            IMapper mapper
+            IMapper mapper,
+            IConfiguration config,
+            IMessageBus messageBus
             )
         {
             _db = db;
             _productService = productService;
             _mapper = mapper;
             _response = new ResponseDTO();
+            _config = config;
+            _messageBus = messageBus;
 
         }
 
@@ -146,6 +150,16 @@ namespace Mango.Services.OrderAPI.Controllers
                     orderHeader.PaymentIntentId = paymentIntent.Id;
                     orderHeader.Status = StaticDetails.Status_Approved;
                     await _db.SaveChangesAsync();
+
+                    RewardDTO rewardDTO = new RewardDTO
+                    {
+                        OrderHeaderId = orderHeader.OrderHeaderId,
+                        UserId = orderHeader.UserId,
+                        RewardsActivity = (int)orderHeader.TotalAmount,
+                    };
+                    var topicName = _config["TopicAndQueueNames:OrderCreatedTopic"];
+
+                    await _messageBus.PublishMessage(rewardDTO, topicName);
 
                     _response.Result = _mapper.Map<OrderHeaderDTO>(orderHeader);
 
