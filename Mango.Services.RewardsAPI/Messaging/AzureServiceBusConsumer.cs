@@ -1,10 +1,10 @@
 ﻿using Azure.Messaging.ServiceBus;
-using Mango.Services.EmailAPI.Models.DTO;
 using Mango.Services.EmailAPI.Service;
+using Mango.Services.RewardAPI.Messaging;
 using Newtonsoft.Json;
 using System.Text;
 
-namespace Mango.Services.EmailAPI.Messaging
+namespace Mango.Services.RewardsAPI.Messaging
 {
     public class AzureServiceBusConsumer : IAzureServiceBusConsumer
     {
@@ -14,13 +14,13 @@ namespace Mango.Services.EmailAPI.Messaging
         private readonly IConfiguration _config;
         private ServiceBusProcessor _emailCartProcessor;
         private ServiceBusProcessor _registerUserProcesser;
-        private EmailService _emailService;
-        public AzureServiceBusConsumer(IConfiguration config, EmailService emailService)
+        private RewardService _emailService;
+        public AzureServiceBusConsumer(IConfiguration config, RewardService emailService)
         {
 
             _config = config;
             serviceBusConnectionString = _config["ServiceBusConnectionString"];
-            emailCartQueue = _config["TopicAndQueueNames:EmailShoppingCartQueue"];
+            emailCartQueue = _config["TopicAndQueueNames:RewardsShoppingCartQueue"];
             registerCartQueue = _config["TopicAndQueueNames:RegisterUserQueue"];
 
             var client = new ServiceBusClient(serviceBusConnectionString);
@@ -32,7 +32,7 @@ namespace Mango.Services.EmailAPI.Messaging
 
         public async Task Start()
         {
-            _emailCartProcessor.ProcessMessageAsync += OnEmailCartRequestReceived;
+            _emailCartProcessor.ProcessMessageAsync += OnRewardsCartRequestReceived;
             _emailCartProcessor.ProcessErrorAsync += ErrorHandler;
             await _emailCartProcessor.StartProcessingAsync();
 
@@ -57,7 +57,7 @@ namespace Mango.Services.EmailAPI.Messaging
             string email = JsonConvert.DeserializeObject<string>(body);
             try
             {
-                await _emailService.RegisterUserEmailAndLog(email);
+                await _emailService.RegisterUserRewardsAndLog(email);
                 await args.CompleteMessageAsync(args.Message);
             }
             catch (Exception)
@@ -67,7 +67,7 @@ namespace Mango.Services.EmailAPI.Messaging
             }
         }
 
-        private async Task OnEmailCartRequestReceived(ProcessMessageEventArgs args)
+        private async Task OnRewardsCartRequestReceived(ProcessMessageEventArgs args)
         {
             var message = args.Message;
             var body = Encoding.UTF8.GetString(message.Body);
@@ -75,7 +75,7 @@ namespace Mango.Services.EmailAPI.Messaging
             CartDTO objMessage = JsonConvert.DeserializeObject<CartDTO>(body);
             try
             {
-                await _emailService.EmailCartAndLog(objMessage);
+                await _emailService.RewardsCartAndLog(objMessage);
                 await args.CompleteMessageAsync(args.Message);
             }
             catch (Exception ex)
