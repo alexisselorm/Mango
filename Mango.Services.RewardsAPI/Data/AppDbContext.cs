@@ -7,7 +7,7 @@ namespace Mango.Services.RewardsAPI.Data
     {
 
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
-        public DbSet<Rewards> Rewardss { get; set; }
+        public DbSet<Rewards> Rewards { get; set; }
 
 
     }
