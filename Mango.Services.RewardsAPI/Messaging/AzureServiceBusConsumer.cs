@@ -1,6 +1,6 @@
 ﻿using Azure.Messaging.ServiceBus;
 using Mango.Services.EmailAPI.Service;
-using Mango.Services.RewardAPI.Messaging;
+using Mango.Services.RewardsAPI.Messages;
 using Newtonsoft.Json;
 using System.Text;
 
@@ -9,55 +9,56 @@ namespace Mango.Services.RewardsAPI.Messaging
     public class AzureServiceBusConsumer : IAzureServiceBusConsumer
     {
         private readonly string serviceBusConnectionString;
-        private readonly string emailCartQueue;
-        private readonly string registerCartQueue;
+        private readonly string orderCreatedTopic;
+        private readonly string orderCreatedRewardSubscription;
         private readonly IConfiguration _config;
-        private ServiceBusProcessor _emailCartProcessor;
-        private ServiceBusProcessor _registerUserProcesser;
-        private RewardService _emailService;
-        public AzureServiceBusConsumer(IConfiguration config, RewardService emailService)
+        private ServiceBusProcessor _rewardProcessor;
+        private RewardService _rewardService;
+        public AzureServiceBusConsumer(IConfiguration config, RewardService rewardService)
         {
 
             _config = config;
             serviceBusConnectionString = _config["ServiceBusConnectionString"];
-            emailCartQueue = _config["TopicAndQueueNames:RewardsShoppingCartQueue"];
-            registerCartQueue = _config["TopicAndQueueNames:RegisterUserQueue"];
+            orderCreatedTopic = _config["TopicAndQueueNames:OrderCreatedTopic"];
+            orderCreatedRewardSubscription = _config["TopicAndQueueNames:OrderCreated_Rewards_Subscription:"];
 
             var client = new ServiceBusClient(serviceBusConnectionString);
-            _emailCartProcessor = client.CreateProcessor(emailCartQueue);
-            _registerUserProcesser = client.CreateProcessor(registerCartQueue);
-            _emailService = emailService;
+            _rewardProcessor = client.CreateProcessor(orderCreatedTopic, orderCreatedRewardSubscription);
+            _rewardService = rewardService;
 
         }
 
         public async Task Start()
         {
-            _emailCartProcessor.ProcessMessageAsync += OnRewardsCartRequestReceived;
-            _emailCartProcessor.ProcessErrorAsync += ErrorHandler;
-            await _emailCartProcessor.StartProcessingAsync();
+            _rewardProcessor.ProcessMessageAsync += OnNewOrderRequestReceived;
+            _rewardProcessor.ProcessErrorAsync += ErrorHandler;
+            await _rewardProcessor.StartProcessingAsync();
 
-            _registerUserProcesser.ProcessMessageAsync += OnUserRegisterRequestReceived;
-            _registerUserProcesser.ProcessErrorAsync += ErrorHandler;
-            await _emailCartProcessor.StartProcessingAsync();
+
         }
+
 
         public async Task Stop()
         {
-            await _emailCartProcessor.StopProcessingAsync();
-            await _emailCartProcessor.DisposeAsync();
+            await _rewardProcessor.StopProcessingAsync();
+            await _rewardProcessor.DisposeAsync();
 
-            await _registerUserProcesser.StopProcessingAsync();
-            await _registerUserProcesser.DisposeAsync();
         }
 
-        private async Task OnUserRegisterRequestReceived(ProcessMessageEventArgs args)
+        private Task ErrorHandler(ProcessErrorEventArgs args)
+        {
+            Console.WriteLine(args.Exception.ToString());
+            return Task.CompletedTask;
+        }
+
+        private async Task OnNewOrderRequestReceived(ProcessMessageEventArgs args)
         {
             var message = args.Message;
             var body = Encoding.UTF8.GetString(message.Body);
-            string email = JsonConvert.DeserializeObject<string>(body);
+            RewardMessage rewardMessage = JsonConvert.DeserializeObject<RewardMessage>(body);
             try
             {
-                await _emailService.RegisterUserRewardsAndLog(email);
+                await _rewardService.UpdateRewards(rewardMessage);
                 await args.CompleteMessageAsync(args.Message);
             }
             catch (Exception)
@@ -67,29 +68,6 @@ namespace Mango.Services.RewardsAPI.Messaging
             }
         }
 
-        private async Task OnRewardsCartRequestReceived(ProcessMessageEventArgs args)
-        {
-            var message = args.Message;
-            var body = Encoding.UTF8.GetString(message.Body);
-
-            CartDTO objMessage = JsonConvert.DeserializeObject<CartDTO>(body);
-            try
-            {
-                await _emailService.RewardsCartAndLog(objMessage);
-                await args.CompleteMessageAsync(args.Message);
-            }
-            catch (Exception ex)
-            {
-
-                throw;
-            }
-        }
-
-        private Task ErrorHandler(ProcessErrorEventArgs args)
-        {
-            Console.WriteLine(args.Exception.ToString());
-            return Task.CompletedTask;
-        }
 
 
     }
