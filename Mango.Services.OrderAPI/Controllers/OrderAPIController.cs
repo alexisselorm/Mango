@@ -7,6 +7,7 @@ using Mango.Services.OrderAPI.Service.IService;
 using Mango.Services.OrderAPI.Utility;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Stripe;
 using Stripe.Checkout;
 
@@ -37,6 +38,56 @@ namespace Mango.Services.OrderAPI.Controllers
             _messageBus = messageBus;
 
         }
+
+
+        [Authorize]
+        [HttpGet("GetOrders")]
+        public async Task<ResponseDTO> Get(string userId = "")
+        {
+            try
+            {
+                IEnumerable<OrderHeader> orderList;
+                if (User.IsInRole(StaticDetails.RoleAdmin))
+                {
+                    orderList = await _db.OrderHeaders.Include(o => o.OrderDetails).OrderByDescending(o => o.OrderHeaderId).ToListAsync();
+                }
+                else
+                {
+                    orderList = await _db.OrderHeaders.Include(o => o.OrderDetails).Where(u => userId == userId).OrderByDescending(o => o.OrderHeaderId).ToListAsync();
+
+                }
+                _response.Result = _mapper.Map<IEnumerable<OrderHeaderDTO>>(orderList);
+
+            }
+            catch (Exception ex)
+            {
+
+                _response.Message = ex.Message;
+                _response.IsSuccess = false;
+            }
+
+            return _response;
+        }
+
+        [Authorize]
+        [HttpGet("GetOrder/{id:int")]
+        public async Task<ResponseDTO> Get(int id)
+        {
+            try
+            {
+                OrderHeader orderHeader = await _db.OrderHeaders.Include(o => o.OrderDetails).FirstAsync(order => order.OrderHeaderId == id);
+                _response.Result = _mapper.Map<OrderHeaderDTO>(orderHeader);
+            }
+            catch (Exception ex)
+            {
+
+                _response.Message = ex.Message;
+                _response.IsSuccess = false;
+            }
+
+            return _response;
+        }
+
 
         [HttpPost("CreateOrder")]
         public async Task<ResponseDTO> CreateOrder([FromBody] CartDTO model)
