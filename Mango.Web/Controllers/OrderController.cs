@@ -20,6 +20,23 @@ namespace Mango.Web.Controllers
             return View();
         }
 
+        public async Task<IActionResult> OrderDetail(int orderId)
+        {
+            OrderHeaderDTO orderHeaderDTO = new();
+            var userId = User.Claims.Where(u => u.Type == JwtRegisteredClaimNames.Sub)?.FirstOrDefault()?.Value;
+            ResponseDTO response = await _orderService.GetOrder(orderId);
+            if (response != null && response.IsSuccess)
+            {
+                orderHeaderDTO = JsonConvert.DeserializeObject<OrderHeaderDTO>(Convert.ToString(response.Result));
+            }
+            if (!User.IsInRole(StaticDetails.RoleAdmin) && userId != orderHeaderDTO.UserId)
+            {
+                return NotFound();
+            }
+            return View(orderHeaderDTO);
+
+        }
+
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
