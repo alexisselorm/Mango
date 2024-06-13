@@ -101,7 +101,7 @@
                                             <h5 class="text-white">TOTAL </h5>
                                         </div>
                                         <div class="col-6 text-end">
-                                            <h5 class="text-white">OrderTotal</h5>
+                                            <h5 class="text-white">@Model.TotalAmount.ToString("C2")</h5>
                                         </div>
                                     </div>
                                 </li>
@@ -110,8 +110,8 @@
                             {
                                 @if (Model.Status == StaticDetails.Status_Approved)
                                 {
-                                    
-                                <button asp-action="OrderReadyForPickup" asp-route-orderId="@Model.OrderHeaderId" type="submit" class="btn btn-success form-control my-1">Ready for Pickup</button>
+
+                                    <button asp-action="OrderReadyForPickup" asp-route-orderId="@Model.OrderHeaderId" type="submit" class="btn btn-success form-control my-1">Ready for Pickup</button>
                                 }
                                 @if (Model.Status == StaticDetails.Status_ReadyForPickup)
                                 {

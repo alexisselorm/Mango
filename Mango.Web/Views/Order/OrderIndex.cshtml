@@ -4,6 +4,26 @@
         <div class="row">
             <h1 class="text-white"> Order List</h1>
         </div>
+
+        <ul class="list-group list-group-horizontal-sm pt-2">
+
+            <a class="text-decoration-none" asp-controller="Order" asp-action="OrderIndex" asp-route-status="approved">
+            <li class="list-group-item">Approved</li>
+            </a>
+
+            <a class="text-decoration-none" asp-controller="Order" asp-action="OrderIndex" asp-route-status="readyforpickup">
+            <li class="list-group-item">Ready for Pickup</li>
+            </a>
+
+            <a class="text-decoration-none" asp-controller="Order" asp-action="OrderIndex" asp-route-status="cancelled">
+            <li class="list-group-item">Cancelled</li>
+            </a>
+
+            <a class="text-decoration-none" asp-controller="Order" asp-action="OrderIndex" asp-route-status="all">
+            <li class="list-group-item">All</li>
+            </a>
+</ul>
+
     </div>
     <div class="card-body p-4">
         <table id="tblData" class="table table-bordered table-striped pt-3" style="width:100%">
