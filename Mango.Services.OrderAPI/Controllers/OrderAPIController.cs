@@ -70,7 +70,7 @@ namespace Mango.Services.OrderAPI.Controllers
         }
 
         [Authorize]
-        [HttpGet("GetOrder/{id:int")]
+        [HttpGet("GetOrder/{id:int}")]
         public async Task<ResponseDTO> Get(int id)
         {
             try
