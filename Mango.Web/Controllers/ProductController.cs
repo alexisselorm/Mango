@@ -128,6 +128,7 @@ namespace Mango.Web.Controllers
         [HttpPost]
         public async Task<IActionResult> ProductEdit(ProductDTO Product)
         {
+            if (ModelState.IsValid) { }
             ResponseDTO response = await _productService.UpdateProductAsync(Product);
 
             if (response != null && response.IsSuccess)
