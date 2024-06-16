@@ -97,7 +97,7 @@ namespace Mango.Services.ProductAPI.Controllers
                         await ProductDTO.Image.CopyToAsync(fileStream);
                     }
                     var baseUrl = HttpContext.Request.Scheme + "://" + HttpContext.Request.Host.Value + HttpContext.Request.PathBase.Value;
-                    product.ImageUrl += baseUrl + "/ProductImages/" + filePath;
+                    product.ImageUrl += baseUrl + "/ProductImages/" + filename;
                     product.ImageLocalPath = filePath;
                 }
                 else
