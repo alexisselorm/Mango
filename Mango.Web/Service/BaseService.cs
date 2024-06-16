@@ -23,7 +23,15 @@ namespace Mango.Web.Service
             {
                 HttpClient client = _httpClientFactory.CreateClient("MangoAPI");
                 HttpRequestMessage message = new();
-                message.Headers.Add("Content-Type", "*/*");
+                if (requestDTO.ContentType == ContentType.MultipartFormData)
+                {
+                    message.Headers.Add("Accept", "*/*");
+                }
+                else
+                {
+
+                    //message.Headers.Add("Accept", "*/*");
+                }
                 //header token here
                 if (withBearer)
                 {
@@ -46,9 +54,14 @@ namespace Mango.Web.Service
                             {
                                 content.Add(new StreamContent(file.OpenReadStream()), prop.Name, file.FileName);
                             }
+                            else
+                            {
+                                content.Add(new StringContent(value == null ? "" : value.ToString()), prop.Name);
+                            }
                         }
 
                     }
+                    message.Content = content;
 
                 }
 
