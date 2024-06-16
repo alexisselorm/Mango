@@ -23,7 +23,7 @@ namespace Mango.Web.Service
             {
                 HttpClient client = _httpClientFactory.CreateClient("MangoAPI");
                 HttpRequestMessage message = new();
-                //message.Headers.Add("Content-Type", "application/json");
+                message.Headers.Add("Content-Type", "*/*");
                 //header token here
                 if (withBearer)
                 {
@@ -32,6 +32,26 @@ namespace Mango.Web.Service
                 }
 
                 message.RequestUri = new Uri(requestDTO.Url);
+
+                if (requestDTO.ContentType == ContentType.MultipartFormData)
+                {
+                    var content = new MultipartFormDataContent();
+                    foreach (var prop in requestDTO.Data.GetType().GetProperties())
+                    {
+                        var value = prop.GetValue(requestDTO.Data);
+                        if (value is FormFile)
+                        {
+                            var file = (FormFile)value;
+                            if (file != null)
+                            {
+                                content.Add(new StreamContent(file.OpenReadStream()), prop.Name, file.FileName);
+                            }
+                        }
+
+                    }
+
+                }
+
                 //If method is post or put, serialize and send the data object
                 if (requestDTO.Data != null)
                 {
