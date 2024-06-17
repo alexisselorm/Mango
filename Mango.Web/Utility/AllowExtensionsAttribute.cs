@@ -15,6 +15,13 @@ namespace Mango.Web.Utility
             if (file != null)
             {
                 var extension = Path.GetExtension(file.FileName);
+
+                foreach (var item in _extensions)
+                {
+                    Console.WriteLine(item);
+                }
+
+                Console.WriteLine(extension);
                 if (!_extensions.Contains(extension.ToLower()))
                 {
                     return new ValidationResult("This extension is not allowed");

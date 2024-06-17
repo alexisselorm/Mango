@@ -71,7 +71,7 @@ namespace Mango.Web.Service
        new()
        {
            ApiType = StaticDetails.ApiType.PUT,
-           Url = StaticDetails.ProductAPIUrl + "/api/product/",
+           Url = StaticDetails.ProductAPIUrl + "/api/product",
            Data = ProductDTO,
            ContentType = StaticDetails.ContentType.MultipartFormData
 
