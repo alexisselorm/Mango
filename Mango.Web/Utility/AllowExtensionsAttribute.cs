@@ -21,7 +21,7 @@ namespace Mango.Web.Utility
                 }
             }
 
-            return base.IsValid(value, validationContext);
+            return ValidationResult.Success;
         }
     }
 }
