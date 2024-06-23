@@ -37,8 +37,8 @@ namespace Mango.Services.EmailAPI.Messaging
             consumer.Received += (ch, ea) =>
             {
                 var content = Encoding.UTF8.GetString(ea.Body.ToArray());
-                String email = JsonConvert.DeserializeObject<string>(content);
-                HandleMessage(email);
+                string email = JsonConvert.DeserializeObject<string>(content);
+                HandleMessage(email).GetAwaiter().GetResult();
 
                 _channel.BasicAck(ea.DeliveryTag, false);
             };
@@ -46,6 +46,9 @@ namespace Mango.Services.EmailAPI.Messaging
 
             return Task.CompletedTask;
         }
-        private async Task HandleMessage(string email) { }
+        private async Task HandleMessage(string email)
+        {
+            await _emailService.RegisterUserEmailAndLog(email);
+        }
     }
 }
