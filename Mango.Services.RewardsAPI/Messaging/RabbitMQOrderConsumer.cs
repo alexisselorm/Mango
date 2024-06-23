@@ -13,11 +13,14 @@ namespace Mango.Services.EmailAPI.Messaging
         private IModel _channel;
         private readonly IConfiguration _config;
         private readonly RewardService _rewardService;
+        private string ExchangeName = "";
         string queueName = "";
+        private const string OrderCreated_RewardsUpdateQueue = "RewardsUpdateQueue";
         public RabbitMQOrderConsumer(IConfiguration config, RewardService rewardService)
         {
             _config = config;
             _rewardService = rewardService;
+            ExchangeName = _config["TopicAndQueueNames:OrderCreatedTopic"];
 
 
             var factory = new ConnectionFactory()
@@ -28,9 +31,10 @@ namespace Mango.Services.EmailAPI.Messaging
             };
             _connection = factory.CreateConnection();
             _channel = _connection.CreateModel();
-            _channel.ExchangeDeclare(_config["TopicAndQueueNames:OrderCreatedTopic"], ExchangeType.Fanout, durable: false);
-            queueName = _channel.QueueDeclare().QueueName;
-            _channel.QueueBind(queueName, _config["TopicAndQueueNames:OrderCreatedTopic"], "");
+            _channel.ExchangeDeclare(ExchangeName, ExchangeType.Direct);
+
+            _channel.QueueDeclare(OrderCreated_RewardsUpdateQueue);
+            _channel.QueueBind(OrderCreated_RewardsUpdateQueue, ExchangeName, "RewardsUpdate");
 
 
 

@@ -13,12 +13,14 @@ namespace Mango.Services.EmailAPI.Messaging
         private IModel _channel;
         private readonly IConfiguration _config;
         private readonly EmailService _emailService;
+        private string ExchangeName = "";
         string queueName = "";
+        private const string OrderCreated_EmailUpdateQueue = "EmailUpdateQueue";
         public RabbitMQOrderConsumer(IConfiguration config, EmailService emailService)
         {
             _config = config;
             _emailService = emailService;
-
+            ExchangeName = _config["TopicAndQueueNames:OrderCreatedTopic"];
 
             var factory = new ConnectionFactory()
             {
@@ -28,9 +30,10 @@ namespace Mango.Services.EmailAPI.Messaging
             };
             _connection = factory.CreateConnection();
             _channel = _connection.CreateModel();
-            _channel.ExchangeDeclare(_config["TopicAndQueueNames:OrderCreatedTopic"], ExchangeType.Fanout, durable: false);
-            queueName = _channel.QueueDeclare().QueueName;
-            _channel.QueueBind(queueName, _config["TopicAndQueueNames:OrderCreatedTopic"], "");
+            _channel.ExchangeDeclare(ExchangeName, ExchangeType.Direct);
+
+            _channel.QueueDeclare(OrderCreated_EmailUpdateQueue);
+            _channel.QueueBind(OrderCreated_EmailUpdateQueue, ExchangeName, "EmailUpdate");
 
 
         }
